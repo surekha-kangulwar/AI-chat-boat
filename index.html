@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple AI Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="chatbox">
+        <div class="chatlogs" id="chatlogs"></div>
+        <input type="text" id="userInput" placeholder="Ask me something..." />
+        <button id="sendButton">Send</button>
+    </div>
+
+    <script>
+        document.getElementById("sendButton").onclick = function() {
+            var userInput = document.getElementById("userInput").value;
+            if (userInput) {
+                var chatlogs = document.getElementById("chatlogs");
+                chatlogs.innerHTML += "<div class='user'>You: " + userInput + "</div>";
+
+                // Send the user input to Flask backend
+                fetch("/get", {
+                    method: "POST",
+                    body: new URLSearchParams("user_input=" + userInput),
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    var botResponse = data.response;
+                    chatlogs.innerHTML += "<div class='bot'>Bot: " + botResponse + "</div>";
+                    document.getElementById("userInput").value = "";
+                    chatlogs.scrollTop = chatlogs.scrollHeight; // Scroll to bottom
+                });
+            }
+        };
+    </script>
+</body>
+</html>
